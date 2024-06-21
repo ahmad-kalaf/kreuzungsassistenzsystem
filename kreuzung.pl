@@ -1,5 +1,10 @@
+% Abbiegende Vorfahrtsstraße
 vorfahrt(mitOR, [A, B, C, D], Reihenfolge) :- 
-	writeln('Noch nicht implementiert...').
+	Reihenfolge = [PrioAFinal, PrioBFinal, PrioCFinal, PrioDFinal],
+	reihenfolgeB_MitOR(B, PrioBFinal),
+	reihenfolgeC_MitOR(C, B, PrioBFinal, PrioCFinal),
+	reihenfolgeD_MitOR(D, B, PrioBFinal, C, PrioCFinal, PrioDFinal),
+	reihenfolgeA_MitOR(A, B, PrioBFinal, C, PrioCFinal, D, PrioDFinal, PrioAFinal).
 % Kreuzungsart ohne
 vorfahrt(ohne, [A, B, C, D], Reihenfolge) :- 
 	kreuzungOhne(ohne, [A, B, C, D], Reihenfolge).
@@ -193,3 +198,58 @@ rechnePrioF3Final(F3, F2, F1, K, PrioF1Final, PrioF2Final, Result) :-
 rechnePrioF3Final(F3, F2, F1, K, PrioF1Final, PrioF2Final, Result) :- 
 	F3 = 'links', (F2 = 'geradeaus'; F2 = 'links'), 
 	Result is PrioF2Final + 1.
+
+% Abbiegende Vorfahrtsstraße
+reihenfolgeB_MitOR(B, Result) :-
+	B = 'kein', Result = 0.
+reihenfolgeB_MitOR(B, Result) :-
+	nichtKein(B), Result = 1.
+
+reihenfolgeC_MitOR(C, B, PrioBFinal, Result) :-
+	C = 'kein', Result = 0.
+reihenfolgeC_MitOR(C, B, PrioBFinal, Result) :-
+	C = 'rechts', Result = 1.
+reihenfolgeC_MitOR(C, B, PrioBFinal, Result) :-
+	C = 'geradeaus', nichtKein(B), Result is PrioBFinal + 1.
+reihenfolgeC_MitOR(C, B, PrioBFinal, Result) :-
+	C = 'geradeaus', B = 'kein', Result = 1.
+reihenfolgeC_MitOR(C, B, PrioBFinal, Result) :-
+	C = 'links', (B = 'geradeaus'; B = 'links'), Result is PrioBFinal + 1.
+reihenfolgeC_MitOR(C, B, PrioBFinal, Result) :-
+	C = 'links', (B = 'kein'; B = 'rechts'), Result = 1.
+
+reihenfolgeD_MitOR(D, B, PrioBFinal, C, PrioCFinal, Result) :-
+	D = 'kein', Result = 0.
+reihenfolgeD_MitOR(D, B, PrioBFinal, C, PrioCFinal, Result) :-
+	nichtKein(D), B = 'kein', C = 'kein', Result = 1.
+reihenfolgeD_MitOR(D, B, PrioBFinal, C, PrioCFinal, Result) :-
+	nichtKein(D), (nichtKein(B); nichtKein(C)),
+	maxP(PrioBFinal, PrioCFinal, PrioTemp), Result is PrioTemp + 1.
+
+reihenfolgeA_MitOR(A, B, PrioBFinal, C, PrioCFinal, D, PrioDFinal, Result) :-
+	A = 'kein', Result = 0.
+reihenfolgeA_MitOR(A, B, PrioBFinal, C, PrioCFinal, D, PrioDFinal, Result) :-
+	A = 'rechts', B = 'kein', C = 'kein', Result = 1.
+reihenfolgeA_MitOR(A, B, PrioBFinal, C, PrioCFinal, D, PrioDFinal, Result) :-
+	A = 'rechts', (nichtKein(B); nichtKein(C)),
+	maxP(PrioBFinal, PrioCFinal, PrioTemp), Result is PrioTemp + 1.
+reihenfolgeA_MitOR(A, B, PrioBFinal, C, PrioCFinal, D, PrioDFinal, Result) :-
+	A = 'geradeaus', nichtKein(D), Result is PrioDFinal + 1.
+reihenfolgeA_MitOR(A, B, PrioBFinal, C, PrioCFinal, D, PrioDFinal, Result) :-
+	A = 'geradeaus', D = 'kein', B = 'kein', C = 'kein', Result = 1.
+reihenfolgeA_MitOR(A, B, PrioBFinal, C, PrioCFinal, D, PrioDFinal, Result) :-
+	A = 'geradeaus', D = 'kein',
+	(nichtKein(B); nichtKein(C)),
+	maxP(PrioBFinal, PrioCFinal, PrioTemp), Result is PrioTemp + 1.
+reihenfolgeA_MitOR(A, B, PrioBFinal, C, PrioCFinal, D, PrioDFinal, Result) :-
+	A = 'links', (D = 'kein'; D = 'rechts'),
+	B = 'kein', C = 'kein', Result = 1.
+reihenfolgeA_MitOR(A, B, PrioBFinal, C, PrioCFinal, D, PrioDFinal, Result) :-
+	A = 'links', (D = 'kein'; D = 'rechts'),
+	(nichtKein(B); nichtKein(C)),
+	maxP(PrioBFinal, PrioCFinal, PrioTemp), Result is PrioTemp + 1.
+reihenfolgeA_MitOR(A, B, PrioBFinal, C, PrioCFinal, D, PrioDFinal, Result) :-
+	A = 'links', (D = 'geradeaus'; D = 'links'), Result is PrioDFinal + 1.
+	
+	
+	
